@@ -1,10 +1,21 @@
 const express = require("express");
+const cors = require("cors");
+const mongodb = require("./db/connect");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-app.use("/", require("./routes"));
+app.use(cors()).use("/", require("./routes"));
 
-app.listen(3000, () => {
-  console.log(`Connected and listening on port: ${PORT}`);
+mongodb.initDb((err) => {
+  if (err) {
+    console.log(err);
+  } else {
+    app.listen(PORT);
+    console.log(
+      "\x1b[35m%s\x1b[0m",
+      `Connected to DB and listening on port: ${PORT}`
+    );
+  }
 });
+// app.use("/", require("./routes"));
