@@ -48,16 +48,26 @@ const getOneBook = async (req, res) => {
 // create book
 const createBook = async (req, res) => {
   try {
-    const bookId = new ObjectId(req.params.id);
-    const result = await mongodb
+    const books = {
+      Title: req.body.Title,
+      Author: req.body.Author,
+      Series: req.body.Series,
+      Pages: req.body.Pages,
+      SeriesNumber: req.body.SeriesNumber,
+    };
+
+    const response = await mongodb
       .getDb()
       .db()
       .collection("books")
-      .find({ _id: bookId });
-    result.toArray().then((lists) => {
-      res.setHeader("Content-Type", "application/json");
-      res.status(200).json(lists[0]);
-    });
+      .insertOne(books);
+    if (response.acknowledged) {
+      res.status(201).json(response);
+    } else {
+      res
+        .status(500)
+        .json(response.error || "Some error occurred creating the book.");
+    }
   } catch (error) {
     res.status(500).json(error);
   }
@@ -78,7 +88,7 @@ const updateBook = async (req, res) => {
       .getDb()
       .db()
       .collection("books")
-      .deleteOne({ _id: bookId }, book);
+      .replaceOne({ _id: bookId }, book);
     if (response.acknowledged) {
       res.status(200).json(response);
     } else {
@@ -99,7 +109,7 @@ const deleteBook = async (req, res) => {
       .getDb()
       .db()
       .collection("books")
-      .deleteOne({ _id: bookId });
+      .deleteOne({ _id: bookId }, true);
     if (response.acknowledged) {
       res.status(200).json(response);
     } else {
@@ -111,6 +121,17 @@ const deleteBook = async (req, res) => {
     res.status(500).json(error);
   }
 };
+
+// // Search books
+// const searchBook = async (req, res) => {
+//   try {
+//     const locals = {
+//       Title: "Search"
+//     }
+//   } catch (error) {
+//     res.statuc(500).json(error);
+//   }
+// }
 
 module.exports = {
   testFunction,
